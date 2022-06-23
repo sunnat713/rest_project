@@ -1,0 +1,12 @@
+import requests
+headers = {'Authorization': 'Bearer 4e1b0fd2f64ec0da39daaf7ccb9d582cb67fb334'}
+
+endpoint = 'http://
+localhost:8000/api/product/'
+data = {
+    'title': 'Nima gap',
+    'content': 'Tinchmi221',
+    'price': 212.12
+}
+get_response = requests.post(endpoint, json=data, headers=headers)
+print(get_response.json())

@@ -5,8 +5,8 @@ from .serializers import ProductSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
-
-from api.mixins import StaffEditorMixin
+from rest_framework.permissions import SAFE_METHODS
+from api.mixins import StaffEditorMixin, UserQuerySetMixin
 
 
 class ProductMixinsView(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -32,28 +32,35 @@ class ProductMixinsView(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.R
         serializer.save(content=content)
 
 
-class ProductListCreateAPIView(StaffEditorMixin, ListCreateAPIView):
+class ProductListCreateAPIView(UserQuerySetMixin, StaffEditorMixin, ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    authentication_classes = [authentication.SessionAuthentication, authentication.TokenAuthentication]
 
     def perform_create(self, serializer):
         title = serializer.validated_data.get('title')
         content = serializer.validated_data.get('content') or None
+        print(self.request.data)
         if content is None:
             content = title
-        serializer.save(content=content)
+        serializer.save(content=content, user=self.request.user)
+
+    # def get_queryset(self, *args, **kwargs):
+    #     qs = super().get_queryset(*args, **kwargs)
+    #     request = self.request
+    #     user = request.user
+    #     if not user.is_authenticated:
+    #         return Product.objects.none()
+    #     return qs.filter(user=request.user)
 
 
-class ProductDetail(StaffEditorMixin, RetrieveAPIView):
+class ProductDetail(UserQuerySetMixin, StaffEditorMixin, RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 
-class ProductUpdate(StaffEditorMixin, UpdateAPIView):
+class ProductUpdate(UserQuerySetMixin, StaffEditorMixin, UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
     lookup_field = 'pk'
 
     def perform_update(self, serializer):
@@ -62,7 +69,7 @@ class ProductUpdate(StaffEditorMixin, UpdateAPIView):
             instance.content = instance.title
 
 
-class ProductDeleteView(StaffEditorMixin, DestroyAPIView):
+class ProductDeleteView(UserQuerySetMixin, StaffEditorMixin, DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'pk'
@@ -91,6 +98,7 @@ def product_alt_view(request, pk=None, *args, **kwargs):
         data = ProductSerializer(queryset, many=True).data
         return Response(data)
     if method == 'POST':
+        print(request.data)
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             title = serializer.validated_data.get('title')
