@@ -21,6 +21,7 @@ class ProductSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail', lookup_field='pk')
     delete_url = serializers.HyperlinkedIdentityField(view_name='product-delete', lookup_field='pk')
     title = serializers.CharField(validators=[validate_title_no_hello, unique_product_title])
+    body = serializers.CharField(source='content', )
 
     # email = serializers.EmailField(source='user.email', read_only=True)
 
@@ -34,11 +35,12 @@ class ProductSerializer(serializers.ModelSerializer):
             'pk',
             'title',
             # 'name',
-            'content',
+            'body',
             'price',
             'sale_price',
             'my_discount',
             'public',
+            'path',
             # 'my_user_data',
             # 'related_products',
             # 'email'
@@ -80,3 +82,4 @@ class ProductSerializer(serializers.ModelSerializer):
         if request is None:
             return None
         return reverse('product-edit', kwargs={"pk": obj.pk}, request=request)
+

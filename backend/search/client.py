@@ -16,6 +16,7 @@ def perform_search(query, **kwargs):
     index = get_index()
     params = {}
     tags = ""
+    print(kwargs)
     if 'tags' in kwargs:
         tags = kwargs.pop('tags') or []
         if len(tags) != 0:
@@ -24,5 +25,6 @@ def perform_search(query, **kwargs):
 
     if len(index_filters) != 0:
         params['facetFilters'] = index_filters
+
     results = index.search(query, params)
     return results

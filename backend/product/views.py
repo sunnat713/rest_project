@@ -1,4 +1,4 @@
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView, ListCreateAPIView, DestroyAPIView
+from rest_framework.generics import RetrieveAPIView, UpdateAPIView, ListCreateAPIView, ListAPIView, DestroyAPIView
 from .models import Product
 from rest_framework import generics, mixins, authentication
 from .serializers import ProductSerializer
@@ -7,6 +7,8 @@ from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import SAFE_METHODS
 from api.mixins import StaffEditorMixin, UserQuerySetMixin
+from .permissions import IsOwner
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class ProductMixinsView(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -98,7 +100,7 @@ def product_alt_view(request, pk=None, *args, **kwargs):
         data = ProductSerializer(queryset, many=True).data
         return Response(data)
     if method == 'POST':
-        print(request.data)
+
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             title = serializer.validated_data.get('title')
@@ -109,3 +111,44 @@ def product_alt_view(request, pk=None, *args, **kwargs):
 
             return Response(serializer.data)
         return Response({"Invalid": 'not good data'}, status=400)
+
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+
+# class ProductAllView(ListAPIView ):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductAllSerializers
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = ['user_id']
+#     permission_classes = [IsOwner]
+
+    # def get_queryset(self, *args, **kwargs):
+    #     # Get queryset of User Model
+    #     queryset = Product.objects.all()
+    #
+    #     # Try to fetch the user_id param from url
+    #     user_id = self.request.query_params.get('user', None)
+    #
+    #
+    #    # def get_queryset(self, *args, **kwargs):
+    #     # Get queryset of User Model
+    #     queryset = Product.objects.all()
+    #
+    #     # Try to fetch the user_id param from url
+    #     user_id = self.request.query_params.get('user_id', None)
+    #
+    #
+    #
+    #     # If user_id param is not None, filter using the obtained user_id
+    #     if user_id is not None:
+    #         queryset = Product.objects.filter(user_id=user_id)
+    #
+    #     return queryset
+
+    #     # If user_id param is not None, filter using the obtained user_id
+    #     if user_id is not None:
+    #         queryset = Product.objects.filter(user_id=user_id)
+    #
+    #     return queryset

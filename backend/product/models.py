@@ -3,9 +3,12 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.db.models import Q
 import random
+
 User = settings.AUTH_USER_MODEL
 
 TAGS_MODEL_VALUES = ['electronics', 'cars', 'boats', 'movies', 'cameras']
+
+
 class ProductQuerySet(models.QuerySet):
     def is_pubic(self):
         return self.filter(public=True)
@@ -33,12 +36,21 @@ class Product(models.Model):
     content = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=150, decimal_places=2, default=99.99)
     public = models.BooleanField(default=True)
+
     # objects = ProductManager()
+    @property
+    def path(self):
+        return f'/product/{self.pk}/'
+
     def __str__(self):
         return self.title
 
     def get_tags_list(self):
         return [random.choice(TAGS_MODEL_VALUES)]
+
+    @property
+    def body(self):
+        return self.content
 
     @property
     def sale_price(self):

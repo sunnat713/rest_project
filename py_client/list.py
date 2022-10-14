@@ -1,6 +1,7 @@
 import requests
 from getpass import getpass
 
+
 endpoint = 'http://localhost:8000/api/auth/'
 username = input('Ismingiz: ')
 
@@ -9,7 +10,7 @@ print(auth_response.json())
 if auth_response.status_code == 200:
     token = auth_response.json()['token']
     headers = {
-        "Authorization": "Bearer " + token
+        "Authorization": f'Bearer {token}'
     }
     endpoint = 'http://localhost:8000/api/product/'
 
